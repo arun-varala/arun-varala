@@ -1,0 +1,14 @@
+---
+- hosts: all
+  roles:
+    #- { role: basic-packages, become: yes }
+    #- { role: filebeat, become: yes }
+    #- { role: inspector, become: yes }
+    - { role: ssm, become: yes }
+    #- { role: telegraf, become: yes }
+    #- { role: version, become: no }
+    #- { role: agent-validation, become: yes }
+    #- { role: ssm-agent-validation }
+    #- { role: telegraf-validation }
+    #- { role: version-compare, become: no }
+    #- { role: http, become: yes }

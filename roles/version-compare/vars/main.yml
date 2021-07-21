@@ -1,0 +1,4 @@
+---
+version_json: "/var/log"
+version_file: "{{ version_json }}/version.json"
+app_version_file: "{{ version_json }}/application-version.json"

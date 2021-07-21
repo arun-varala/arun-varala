@@ -1,0 +1,17 @@
+---
+- name: Download Amazon Inspector agent script
+  get_url:
+    url:  "{{ inspector_download_url }}"
+    dest: "{{ inspector_install_script }}"
+    mode: 0744
+
+- name: Run the Amazon Inspector installation script
+  command: "{{ inspector_install_script }}"
+  args:
+    creates: install
+
+- name: Enable the Inspector service to start on boot
+  service:
+    name: awsagent
+    state: stopped
+    enabled: yes

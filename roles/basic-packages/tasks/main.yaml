@@ -1,0 +1,35 @@
+---
+# name: update base repo packages
+#  yum:
+#    name: '*'
+#    state: latest
+
+#- name: install epel-release repo
+#  yum:
+#    name: "{{ epel_repo }}"
+
+#- name: ensure list of packages are installed using yum
+#  yum:
+#    name: "{{ yum_packages }}"
+
+- name: unzip
+  unarchive:
+    src: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+    dest: /tmp
+    remote_src: yes
+
+- name: Run the Amazon Inspector installation script
+  command: ./aws/install
+  args:
+    chdir: /tmp
+
+- name: install aws-cfn-bootstrap
+  yum:
+    name: https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
+
+- name: create python link
+  file:
+    state: link
+    src: /usr/local/lib/python2.7/site-packages/cfnbootstrap
+    dest: /usr/lib/python2.7/site-packages/cfnbootstrap
+

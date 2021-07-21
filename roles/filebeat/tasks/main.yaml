@@ -1,0 +1,29 @@
+---
+- name: Install rpm key for elastic.co
+  rpm_key:
+    state: present
+    key: "{{ elastic_rpm_key }}"
+
+- name: Add Filebeat Repository
+  template:
+    src: elastic.repo.j2
+    dest: "{{ elastic_repo_path }}"
+    owner: root
+    group: root
+
+- name: Install Filebeat agent
+  yum:
+    name: "filebeat-{{ filebeat_version }}"
+    state: present
+
+- name: Enable the Filebeat service to start on boot
+  systemd:
+    name: filebeat.service
+    state: stopped
+    enabled: yes
+
+- name: Remove Filebeat Repository
+  yum_repository:
+    name: filebeat
+    state: absent
+

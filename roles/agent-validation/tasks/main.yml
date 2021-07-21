@@ -1,0 +1,14 @@
+---
+- name: Check agent status
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+   - telegraf
+   - awsagent
+   - amazon-ssm-agent
+   - filebeat
+  become: yes
+  register: agent_result
+  failed_when: agent_result.changed

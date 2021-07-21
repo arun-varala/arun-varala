@@ -1,0 +1,29 @@
+---
+##1 This validation checks whether a connection can be established via SSM Agent.
+- name: Get instance id
+  uri:
+    url: "{{ aws_metadata_url }}"
+    return_content: yes
+  register: instance_id
+
+##run aws ssm connection status command on the controller
+- name: SSM agent connection status
+  command: aws ssm get-connection-status --target "{{ instance_id.content }}"
+  delegate_to: localhost
+  register: ssm_conn_status
+  changed_when: False
+
+##store stdout value as json to access in fail step
+- name: Set fact SSM connection status
+  set_fact:
+    ssm_result: "{{ ssm_conn_status.stdout|from_json }}"
+
+- name: Debug ssm agent connection cmd
+  debug: var=ssm_conn_status
+  when: ssm_result.Status != "connected"
+
+- name: Fail if SSM agent is not connected
+  fail:
+    msg: "Fail if SSM agent status is not connected."
+  when: ssm_result.Status != "connected"
+

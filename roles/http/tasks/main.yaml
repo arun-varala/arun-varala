@@ -1,0 +1,16 @@
+---
+#- name: display http_validation_url
+#  debug:
+#    msg: "{{ http_validation_url }}"
+
+- name: Check http endpoint(s) for status code 200
+  uri:
+    url: "{{ url }}"
+    status_code: 200
+  register: health_status
+
+- name: Fail if health status is not equal to 200
+  fail:
+    msg: "Fail if health status is not equal to 200."
+  #failed_when: health_status.status != 200
+  when: url is defined

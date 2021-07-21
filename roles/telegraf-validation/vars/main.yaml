@@ -1,0 +1,16 @@
+telegraf_port: ":9126"
+telegraf_path: "/metrics"
+telegraf_endpoint: "http://{{ ansible_facts.default_ipv4.address }}{{ telegraf_port }}{{ telegraf_path }}"
+
+check_metrics:
+  # this validates the following metric-labels are not null or == 0 on telegraf or prometheus for the target-host
+  - cpu_usage_system
+  - go_info
+  - disk_total
+  - mem_total
+  - disk_free
+  - diskio_write_bytes
+  - mem_available
+  - mem_swap_free
+  - net_bytes_recv
+  - system_uptime

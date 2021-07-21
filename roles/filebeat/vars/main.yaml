@@ -1,0 +1,5 @@
+elastic_rpm_key: "https://packages.elastic.co/GPG-KEY-elasticsearch"
+elastic_yum_baseurl: "https://artifacts.elastic.co/packages/6.x/yum"
+elastic_repo_path: "/etc/yum.repos.d/elastic.repo"
+filebeat_version: 6.7.0
+

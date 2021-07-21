@@ -1,0 +1,32 @@
+- name: Add InfluxDB Repository
+  template:
+    src: influxdb.repo.j2
+    dest: /etc/yum.repos.d/influxdb.repo
+    owner: root
+    group: root
+
+- name: Install Telegraf
+  yum:
+    name: "{{ telegraf_pkg_name }}"
+    state: latest # noqa 403
+
+- name: Copy default prometheus client configuation
+  template:
+    src: telegraf.conf.j2
+    dest: "{{ telegraf_config_dir }}"
+
+- name: Copy default prometheus client configuation
+  template:
+    src: zgw.conf.j2
+    dest: "{{ telegraf_config_dir }}"
+
+- name: Enable the Telegraf service to start on boot
+  systemd:
+    name: telegraf.service
+    state: stopped
+    enabled: yes
+
+- name: Remove InfluxDB Repository
+  yum_repository:
+    name: influxdb
+    state: absent

@@ -1,0 +1,64 @@
+---
+  - name: Get AWS version.
+    command: "aws --version"
+    changed_when: False
+    register: aws_version_fact
+  
+  - name: Facts for aws-cli version.
+    set_fact:
+      awscli_version: "{{ aws_version_fact.stdout.split(' ')[0][8:] }}"
+  
+  #- name: Get telegraf version.
+  #  command: "telegraf --version"
+  #  changed_when: False
+  #  register: telegraf_version_fact
+  
+  #- name: Facts for telegraf version.
+  #  set_fact:
+  #    telegraf_version: "{{ telegraf_version_fact.stdout.split(' ')[1] }}"
+  
+  #- name: Get filebeat version.
+  #  command: "filebeat version"
+  #  changed_when: False
+  #  register: filebeat_version_fact
+  
+  #- name: Facts for the filebeat version.
+  #  set_fact:
+  #    filebeat_version: "{{ filebeat_version_fact.stdout.split(' ')[2] }}"
+  
+  #- name: Get SSM version
+  #  yum:
+  #    list: installed
+  #  become: yes
+  #  register: listed_packages
+  #  no_log: True
+  
+  #- name: Facts for the SSM version.
+  #  set_fact:
+  #    ssm_version: "{{ item }}"
+  #  with_items: "{{ listed_packages | json_query(jsonquery) }}"
+  #  vars:
+  #    jsonquery: "results[?name=='amazon-ssm-agent'].version"
+  
+  - name: Copy version info to version json file on target host.
+    become: yes
+    copy:
+      dest: "{{ version_file_directory }}/version.json"
+      owner: root
+      group: root
+      mode: 0644
+      content: |
+        {
+          "awscli": "{{ awscli_version }}"
+        }
+  
+  - name: Create markdown version file for wiki.
+    lineinfile:
+      create: yes
+      path: ./agent_version.md
+      line: "{{ item }}"
+      state: present
+    delegate_to: localhost
+    with_items:
+      - "***"
+      - "* AWS-CLI: {{ awscli_version }}"  

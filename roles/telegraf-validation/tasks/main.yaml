@@ -1,0 +1,44 @@
+---
+#  This role validates Prometheus-formatted metrics from the target-host:
+#    The telegraf service is in a healthy running state on the temp centos-host
+#    - Telegraf is exposing prometheus metrics on the target-agent's endpoint and they are valid values
+#    - The published host-metrics can be retrieved from a prometheus host running in a docker container on the Jenkins Worker that matches the current live-version
+# 
+- name: get metrics from target-host telegraf at "{{ ansible_facts.default_ipv4.address }}"
+  uri:
+    url: "{{ telegraf_endpoint }}"
+    return_content: yes
+  register: telegraf_result
+
+- name: validate telegraf metrics from target-host
+  shell: "set -o pipefail; curl -s {{ telegraf_endpoint }} | grep  {{ item }} | grep -oE '[^ ]+$' | tail -1"
+          # grep: select the integer value at the end of the line for every last result
+  args:
+    warn: no
+  with_items: "{{ check_metrics }}"
+  register: telegraf_targethost_result
+  failed_when:
+    (telegraf_targethost_result is not defined and telegraf_targethost_result) or
+    (telegraf_targethost_result.rc != 0)
+  changed_when: False
+  delegate_to: localhost
+
+- name: check if docker-prom is healthy
+  uri:
+    url: http://{{ prom_server_ip }}:9090/-/healthy
+  register: prom_health
+  failed_when: "prom_health.status != 200"
+  delegate_to: localhost
+
+- name: get host metrics at http://{{ prom_server_ip }}:9090/api/v1/query?query=up{"instance={{ ansible_facts.default_ipv4.address }}{{ telegraf_port }}"}
+  uri:
+    url: http://{{ prom_server_ip }}:9090/api/v1/query?query={{ item }}{instance="{{ ansible_facts.default_ipv4.address }}{{ telegraf_port }}"}
+  register: prom_result
+  loop: "{{ check_metrics }}"
+  delegate_to: localhost
+
+- name: check docker-prom metrics for a null value in the target-host's metric results
+  debug: var=item
+  with_list: "{{ prom_result |json_query('results[].json.data.result[*].value[1]') }}"
+  failed_when: item == []
+  delegate_to: localhost

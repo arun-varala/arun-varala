@@ -1,0 +1,90 @@
+---
+- name: Get AWS version.
+  command: "aws --version"
+  args:
+    creates: version
+  register: aws_version_fact
+
+- name: Facts for aws-cli version.
+  set_fact:
+    awscli_version: "{{ aws_version_fact.stderr | regex_replace(' [A-Z].*','') | regex_replace ('\\/',' ') }}"
+
+- name: Debug the aws-cli version
+  debug:
+    var: awscli_version
+
+- name: Get telegraf version.
+  command: "telegraf --version"
+  args:
+    creates: version
+  register: telegraf_version_fact
+
+- name: Facts for telegraf version.
+  set_fact:
+    telegraf_version: "{{ telegraf_version_fact.stdout | regex_replace(' \\([a-z].*.','') }}"
+
+- name: Debug the telegraf version.
+  debug:
+    var: telegraf_version
+
+- name: Get filebeat version.
+  command: "filebeat version"
+  args:
+    creates: version
+  register: filebeat_version_fact
+
+- name: Facts for the filebeat version.
+  set_fact:
+    filebeat_version: "{{ filebeat_version_fact.stdout | regex_replace(' \\([a-z].*.','') }}"
+
+- name: Debug the filebeat version.
+  debug:
+    var: filebeat_version
+
+- name: Get SSM version
+  yum:
+    list: installed
+  become: yes
+  register: listed_packages
+  no_log: True
+
+- name: Facts for the SSM version.
+  set_fact:
+    ssm_version: "{{ item }}"
+  with_items: "{{ listed_packages | json_query(jsonquery) }}"
+  vars:
+    jsonquery: "results[?name=='amazon-ssm-agent'].version"
+
+- name: version information to version json file
+  become: yes
+  copy:
+    dest: "{{ version_json }}/application-version.json"
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      {
+        "{{ awscli_version }}",
+        "{{ telegraf_version }}",
+        "{{ filebeat_version }}",
+        "SSM {{ ssm_version }}"
+      }
+
+- name: Read the golden AMI version file.
+  command: "cat {{ version_file }}"
+  become: yes
+  args:
+    creates: version
+  register: first
+
+- name: Read the application AMI version file.
+  command: "cat {{ app_version_file }}"
+  become: yes
+  args:
+    creates: version
+  register: second
+
+- name: check for changes between files.
+  fail:
+    msg: fail
+  when: first.stdout != second.stdout

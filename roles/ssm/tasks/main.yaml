@@ -1,0 +1,6 @@
+---
+- name: Ensure Amazon SSM agent is installed
+  yum:
+    name: "{{ ssm_download_url }}"
+    #state: latest
+

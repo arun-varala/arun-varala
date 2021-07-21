@@ -1,0 +1,8 @@
+[elastic-6.x]
+name=Elastic repository for 6.x packages
+baseurl={{ elastic_yum_baseurl  }}
+gpgcheck=1
+gpgkey= {{ elastic_rpm_key }}
+enabled=1
+autorefresh=1
+type=rpm-md

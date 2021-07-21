@@ -1,0 +1,4 @@
+---
+epel_repo: ['epel-release']
+yum_packages: ['bind-utils', 'openssl098e', 'python-devel', 'python-pip', 'unzip', 'wget']
+pip_packages: ['awscli']

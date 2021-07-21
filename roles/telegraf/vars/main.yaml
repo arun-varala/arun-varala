@@ -1,0 +1,4 @@
+telegraf_pkg_name: "telegraf"
+telegraf_config_dir: "/etc/telegraf/telegraf.conf"
+telegraf_config_dir: "/etc/telegraf/telegraf.d/zgw.conf"
+telegraf_version_api: "https://api.github.com/repos/influxdata/telegraf/releases/latest"
